@@ -54,6 +54,7 @@ def process_video_stream():
 
 
         query = df.writeStream \
+            .outputMode("append")\
             .foreachBatch(lambda batch_df, _: save_processed_frames(batch_df.collect())) \
             .start()
 
