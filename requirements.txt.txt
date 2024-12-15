@@ -1,0 +1,4 @@
+kafka-python-ng==2.2.3
+pyspark==3.4.4
+numpy==2.2.0
+opencv-python==4.10.0.84
