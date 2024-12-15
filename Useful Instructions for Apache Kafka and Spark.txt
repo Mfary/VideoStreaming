@@ -1,0 +1,45 @@
+برای استارت کردن zookeeper:
+bin/zookeeper-server-start.sh config zookeeper.properties
+
+برای استارت کردن kafka:
+bin/kafka-server-start.sh config/server.properties
+
+
+برای نشون دادن UI اسپارک:
+spark-shell
+
+
+برای اجرای برنامه اسپارک:
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3 spark_word_count.py
+
+
+برای چک کردن تمام تاپیک های ساخته شده:
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+
+برای حذف تاپیک کافکا:
+bin/kafka-topics.sh --delete --bootstrap-server localhost:9092 --topic <topicname>
+
+
+برای ایجاد تاپیک کافکا:
+bin/kafka-topics.sh --create --topic <your_topic_name> --bootstrap-server localhost:9092 --partitions <partitions number> --replication-factor <replication_number>
+
+
+bin/kafka-topics.sh --create --topic <your_topic_name> --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+
+برای چک کردن وضعیت تاپیک کافکا در لحظه:
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <your-topic-name> --from-beginning
+
+
+برای دیدن اطلاعات تاپیک کافکا:
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --topic <topic-name> --describe
+
+حذف متادیتای ذخیره شده در کافکا:
+cd /kafka/data/server/
+then > rm -rf *
+
+
+
+
+
