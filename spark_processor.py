@@ -24,41 +24,43 @@ def apply_filters(frame_bytes):
 
 
 def process_video_stream():
-    spark = SparkSession.builder \
-        .appName("VideoStreamProcessor") \
-        .getOrCreate()
+    try:
+        spark = SparkSession.builder \
+            .appName("VideoStreamProcessor") \
+            .getOrCreate()
 
-    schema = StructType([
-        StructField("value", BinaryType(), True)
-    ])
+        schema = StructType([
+            StructField("value", BinaryType(), True)
+        ])
 
-    df = spark.readStream \
-        .format("kafka") \
-        .option("kafka.bootstrap.servers", BROKER) \
-        .option("subscribe", TOPIC) \
-        .load() \
-        .selectExpr("CAST(value AS BINARY)")
-
-
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
-    edges_output_writer = cv2.VideoWriter(EDGES_OUTPUT_FILE, fourcc, FPS, (FRAME_WIDTH, FRAME_HEIGHT), isColor=False)
-
-    def save_processed_frames(rows):
-        for row in rows:
-            frame_bytes = row['value']
-            edge_frame = apply_filters(frame_bytes)
-
-            
-            edges_output_writer .write(edge_frame)
+        df = spark.readStream \
+            .format("kafka") \
+            .option("kafka.bootstrap.servers", BROKER) \
+            .option("subscribe", TOPIC) \
+            .load() \
+            .selectExpr("CAST(value AS BINARY)")
 
 
-    query = df.writeStream \
-        .foreachBatch(lambda batch_df, _: save_processed_frames(batch_df.collect())) \
-        .start()
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
+        edges_output_writer = cv2.VideoWriter(EDGES_OUTPUT_FILE, fourcc, FPS, (FRAME_WIDTH, FRAME_HEIGHT), isColor=False)
 
-    query.awaitTermination()
-    edges_output_writer.release()
-    print(f"Processed video saved to {EDGES_OUTPUT_FILE}")
+        def save_processed_frames(rows):
+            for row in rows:
+                frame_bytes = row['value']
+                edge_frame = apply_filters(frame_bytes)
+
+                
+                edges_output_writer.write(edge_frame)
+
+
+        query = df.writeStream \
+            .foreachBatch(lambda batch_df, _: save_processed_frames(batch_df.collect())) \
+            .start()
+
+        query.awaitTermination()
+    finally:
+        edges_output_writer.release()
+        print(f"Processed video saved to {EDGES_OUTPUT_FILE}")
 
 
 process_video_stream()
